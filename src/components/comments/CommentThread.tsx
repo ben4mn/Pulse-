@@ -5,7 +5,7 @@ import { useUIStore } from '../../store/uiStore';
 import { SourceBadge } from '../feed/SourceBadge';
 import { CommentItem } from './CommentItem';
 import { hnProvider } from '../../providers/hn';
-import { redditProvider } from '../../providers/reddit';
+import { redditProvider, RedditRateLimitError } from '../../providers/reddit';
 
 function timeAgo(ts: number): string {
   const seconds = Math.floor((Date.now() - ts) / 1000);
@@ -22,7 +22,7 @@ export function CommentThread() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { items, currentItem, comments, commentsLoading, setCurrentItem, setComments, setCommentsLoading } = useFeedStore();
-  const { activeTab: _activeTab } = useUIStore();
+  const { setRedditRateLimited } = useUIStore();
 
   const itemId = id ? decodeURIComponent(id) : null;
   const item = currentItem ?? items.find((i) => i.id === itemId) ?? null;
@@ -47,9 +47,12 @@ export function CommentThread() {
 
     provider.fetchComments(item.id)
       .then(setComments)
-      .catch(() => setComments([]))
+      .catch((err) => {
+        if (err instanceof RedditRateLimitError) setRedditRateLimited(err.endpoint);
+        setComments([]);
+      })
       .finally(() => setCommentsLoading(false));
-  }, [item, setComments, setCommentsLoading]);
+  }, [item, setComments, setCommentsLoading, setRedditRateLimited]);
 
   if (!item) {
     return (

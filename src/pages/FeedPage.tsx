@@ -5,7 +5,7 @@ import { useUIStore } from '../store/uiStore';
 import { FeedList } from '../components/feed/FeedList';
 import { PullToRefresh } from '../components/layout/PullToRefresh';
 import { hnProvider } from '../providers/hn';
-import { redditProvider } from '../providers/reddit';
+import { redditProvider, RedditRateLimitError } from '../providers/reddit';
 import { substackProvider } from '../providers/substack';
 import { twitterProvider } from '../providers/twitter';
 import { threadsProvider } from '../providers/threads';
@@ -16,7 +16,7 @@ import type { FeedItem } from '../providers/types';
 
 export function FeedPage() {
   const { items, loading, hasMore, page, setItems, appendItems, setLoading, setError, setHasMore, setPage, updateItemSummary, reset } = useFeedStore();
-  const { activeTab } = useUIStore();
+  const { activeTab, setRedditRateLimited } = useUIStore();
   const settings = useSettingsStore();
 
   const loadFeed = useCallback(async (pageNum: number, append: boolean = false) => {
@@ -32,7 +32,10 @@ export function FeedPage() {
         setHasMore(result.hasMore);
       } else if (activeTab === 'reddit') {
         const results = await Promise.all(
-          settings.subreddits.map((sub) => redditProvider.fetchFeed(`${sub}:hot`, pageNum).catch(() => ({ items: [], hasMore: false }))),
+          settings.subreddits.map((sub) => redditProvider.fetchFeed(`${sub}:hot`, pageNum).catch((err) => {
+            if (err instanceof RedditRateLimitError) setRedditRateLimited(err.endpoint);
+            return { items: [], hasMore: false };
+          })),
         );
         newItems = results.flatMap((r) => r.items);
         newItems.sort((a, b) => b.timestamp - a.timestamp);
@@ -82,7 +85,10 @@ export function FeedPage() {
           try {
             const rResults = await Promise.all(
               settings.subreddits.slice(0, 3).map((sub) =>
-                redditProvider.fetchFeed(`${sub}:hot`, 0).catch(() => ({ items: [], hasMore: false }))),
+                redditProvider.fetchFeed(`${sub}:hot`, 0).catch((err) => {
+                  if (err instanceof RedditRateLimitError) setRedditRateLimited(err.endpoint);
+                  return { items: [], hasMore: false };
+                })),
             );
             feeds.push(rResults.flatMap((r) => r.items));
           } catch { /* skip */ }
@@ -124,6 +130,9 @@ export function FeedPage() {
         autoGenerateSummaries(allItems, settings.openaiKey, updateItemSummary);
       }
     } catch (err) {
+      if (err instanceof RedditRateLimitError) {
+        setRedditRateLimited(err.endpoint);
+      }
       setError(err instanceof Error ? err.message : 'Failed to load feed');
     } finally {
       setLoading(false);

@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: '/Pulse-/',
   plugins: [
     react(),
     tailwindcss(),
@@ -14,7 +15,7 @@ export default defineConfig({
         name: 'Pulse',
         short_name: 'Pulse',
         description: 'Custom social feed aggregator',
-        start_url: '/',
+        start_url: '/Pulse-/',
         display: 'standalone',
         background_color: '#0f172a',
         theme_color: '#f97316',

@@ -4,6 +4,15 @@ import { sessionCache } from '../services/cache';
 
 const LIST_TTL = 2 * 60 * 1000;
 
+export class RedditRateLimitError extends Error {
+  endpoint: string;
+  constructor(endpoint: string) {
+    super('Reddit rate limit exceeded (429)');
+    this.name = 'RedditRateLimitError';
+    this.endpoint = endpoint;
+  }
+}
+
 interface RedditPost {
   data: {
     id: string;
@@ -109,6 +118,7 @@ export const redditProvider: FeedProvider = {
 
     if (!data) {
       const res = await fetch(url);
+      if (res.status === 429) throw new RedditRateLimitError(url);
       if (!res.ok) throw new Error(`Reddit API error: ${res.status}`);
       const json = await res.json();
       const posts: RedditPost[] = json.data.children.filter((c: { kind: string }) => c.kind === 't3');
@@ -129,6 +139,7 @@ export const redditProvider: FeedProvider = {
     // We need subreddit — try to find it from the feed store
     const url = `https://www.reddit.com/comments/${id}.json?raw_json=1&limit=100`;
     const res = await fetch(url);
+    if (res.status === 429) throw new RedditRateLimitError(url);
     if (!res.ok) throw new Error(`Reddit comments error: ${res.status}`);
     const json = await res.json();
     const commentListing = json[1];
