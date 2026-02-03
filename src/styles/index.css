@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pulse: #f97316;
+  --color-pulse-light: #fb923c;
+  --color-pulse-dark: #ea580c;
+  --color-hn: #ff6600;
+  --color-reddit: #ff4500;
+  --color-substack: #ff6719;
+  --color-twitter: #1d9bf0;
+  --color-threads: #000000;
+}
+
+/* Safe area support */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+/* View transitions */
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+.view-enter { animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.view-exit { animation: slideOut 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+/* Pull-to-refresh */
+@keyframes ptr-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes ptr-glow-pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+.ptr-spinner {
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+}
+.ptr-refreshing .ptr-loader {
+  animation: ptr-spin 0.8s linear infinite;
+}
+.ptr-refreshing .ptr-glow {
+  animation: ptr-glow-pulse 1.2s ease-in-out infinite;
+}
+
+/* Thread depth colors */
+.thread-0 { border-left-color: #f97316; }
+.thread-1 { border-left-color: #3b82f6; }
+.thread-2 { border-left-color: #10b981; }
+.thread-3 { border-left-color: #8b5cf6; }
+.thread-4 { border-left-color: #ef4444; }
+.thread-5 { border-left-color: #eab308; }
+
+/* Reader typography */
+.reader-text {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #374151;
+}
+.dark .reader-text { color: #d1d5db; }
+
+.reader-text h1 { font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0 0.75rem; }
+.reader-text h2 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.5rem; }
+.reader-text h3 { font-size: 1.1rem; font-weight: 600; margin: 1rem 0 0.5rem; }
+.dark .reader-text h1, .dark .reader-text h2, .dark .reader-text h3 { color: #f3f4f6; }
+
+.reader-text p { margin: 0.75rem 0; }
+.reader-text a { color: #f97316; text-decoration: underline; word-break: break-word; }
+.reader-text img { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+
+.reader-text blockquote {
+  border-left: 3px solid #f97316;
+  background: #fff7ed;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  border-radius: 0 0.25rem 0.25rem 0;
+}
+.dark .reader-text blockquote { background: #1e293b; }
+
+.reader-text pre {
+  background: #f1f5f9;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+.dark .reader-text pre { background: #1e293b; }
+
+.reader-text code {
+  background: #f1f5f9;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}
+.dark .reader-text code { background: #1e293b; }
+.reader-text pre code { background: transparent; padding: 0; }
+
+.reader-text table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.reader-text th, .reader-text td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
+.reader-text th { background: #f1f5f9; font-weight: 600; }
+.dark .reader-text th { background: #1e293b; }
+.dark .reader-text th, .dark .reader-text td { border-color: #374151; }
+
+/* Skeleton pulse */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+.skeleton {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  background: #e2e8f0;
+  border-radius: 0.25rem;
+}
+.dark .skeleton { background: #334155; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+.dark ::-webkit-scrollbar-thumb { background: #475569; }
+
+/* Touch target */
+.touch-target { min-height: 44px; min-width: 44px; }
+
+/* Summary fade-in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.fade-in { animation: fadeIn 0.3s ease-in forwards; }
+
+/* Comment collapse */
+.comment-body-collapsed {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out, opacity 0.15s ease-out;
+}
+.comment-body-expanded {
+  max-height: 10000px;
+  opacity: 1;
+  transition: max-height 0.3s ease-in, opacity 0.2s ease-in;
+}
